@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
   "httpx>=0.27,<1",
-  "openai>=2.0,<3",
+  "openai>=2.53.0,<3",
   "pydantic>=2.10,<3",
   "PyYAML>=6.0,<7",
   "typer>=0.15,<1",
