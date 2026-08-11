@@ -49,6 +49,10 @@ Every Plugin declares:
 - structured `PluginResult` data with bounded output;
 - expected error behavior without credentials or sensitive internal details.
 
+Registration rejects a Plugin unless `action_models` and `action_permissions` contain exactly the
+same action names. Actions that need no capability must still declare an explicit empty set. The
+base `execute` method repeats this contract check before every call.
+
 Do not override `execute`. The base method owns permission and argument validation. Put behavior in
 `_execute`, and re-validate/cast the action model there for static type clarity.
 

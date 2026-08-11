@@ -2,18 +2,24 @@
 
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from agentforge.plugins.base import PluginResult
 
 
-class SkillSelection(BaseModel):
+class LLMControlModel(BaseModel):
+    """Base for untrusted model output that rejects unknown control fields."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SkillSelection(LLMControlModel):
     """Validated names selected from the available Skill registry."""
 
     skills: tuple[str, ...] = Field(default=(), max_length=3)
 
 
-class PlanStep(BaseModel):
+class PlanStep(LLMControlModel):
     """One plugin action proposed by the untrusted model."""
 
     plugin: str = Field(min_length=1, max_length=100)
@@ -21,7 +27,7 @@ class PlanStep(BaseModel):
     arguments: dict[str, Any] = Field(default_factory=dict)
 
 
-class ExecutionPlan(BaseModel):
+class ExecutionPlan(LLMControlModel):
     """Bounded, validated sequence of plugin calls."""
 
     rationale: str = Field(default="", max_length=2_000)

@@ -67,5 +67,8 @@ def load_config(
 
     try:
         return AppConfig.model_validate(data)
-    except ValidationError as exc:
-        raise ConfigError(f"Configuration validation failed: {exc}") from exc
+    except ValidationError:
+        pass
+    raise ConfigError(
+        "Configuration validation failed; check field names, types, and allowed values"
+    )

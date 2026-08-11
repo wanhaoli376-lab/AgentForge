@@ -33,6 +33,25 @@ class NetworkProbePlugin(Plugin):
         return PluginResult.success()
 
 
+class UndeclaredPermissionPlugin(Plugin):
+    name = "undeclared-permission"
+    description = "Test-only plugin missing its permission declaration."
+    action_models: ClassVar = {"probe": NoArguments}
+
+    def __init__(self) -> None:
+        self.was_called = False
+
+    def _execute(
+        self,
+        action: str,
+        arguments: BaseModel,
+        context: PluginContext,
+    ) -> PluginResult:
+        del action, arguments, context
+        self.was_called = True
+        return PluginResult.success()
+
+
 def test_plugin_without_network_permission_never_reaches_implementation(tmp_path: Path) -> None:
     plugin = NetworkProbePlugin()
     context = PluginContext(tmp_path, PermissionManager(set()))
@@ -43,3 +62,15 @@ def test_plugin_without_network_permission_never_reaches_implementation(tmp_path
     assert plugin.was_called is False
     assert result.error is not None
     assert result.error.code == "permission_denied"
+
+
+def test_plugin_with_undeclared_action_permissions_never_executes(tmp_path: Path) -> None:
+    plugin = UndeclaredPermissionPlugin()
+    context = PluginContext(tmp_path, PermissionManager(set()))
+
+    result = plugin.execute("probe", {}, context)
+
+    assert result.ok is False
+    assert plugin.was_called is False
+    assert result.error is not None
+    assert result.error.code == "plugin_contract_error"

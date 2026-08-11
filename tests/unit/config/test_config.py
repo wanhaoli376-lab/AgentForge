@@ -32,3 +32,18 @@ def test_unsafe_or_malformed_config_is_rejected(tmp_path: Path, content: str) ->
 
     with pytest.raises(ConfigError):
         load_config(path)
+
+
+def test_validation_error_does_not_echo_secret_value(tmp_path: Path) -> None:
+    sensitive_value = "sk-do-not-repeat-this-value"
+    path = tmp_path / "agentforge.yaml"
+    path.write_text(
+        f"agent:\n  model:\n    - {sensitive_value}\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigError) as caught:
+        load_config(path)
+
+    assert sensitive_value not in str(caught.value)
+    assert caught.value.__cause__ is None

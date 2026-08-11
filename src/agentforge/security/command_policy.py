@@ -2,7 +2,7 @@
 
 import re
 from collections.abc import Collection, Sequence
-from pathlib import PureWindowsPath
+from pathlib import PurePosixPath, PureWindowsPath
 
 from agentforge.exceptions import PolicyViolationError
 
@@ -56,9 +56,15 @@ class CommandPolicy:
             raise PolicyViolationError("Shell metacharacters are not accepted")
         for argument in argv[1:]:
             candidate = argument.split("=", 1)[-1] if argument.startswith("--") else argument
+            windows_path = PureWindowsPath(candidate)
+            posix_path = PurePosixPath(candidate)
             if (
                 candidate.startswith("~")
-                or PureWindowsPath(candidate).is_absolute()
+                or bool(windows_path.drive)
+                or bool(windows_path.root)
+                or windows_path.is_absolute()
+                or bool(posix_path.root)
+                or posix_path.is_absolute()
                 or self._PATH_TRAVERSAL.search(candidate)
             ):
                 raise PolicyViolationError("Command arguments cannot escape the workspace")
@@ -75,7 +81,14 @@ class CommandPolicy:
             raise PolicyViolationError(
                 "Only read-only git status/diff/log/show actions are allowed"
             )
-        blocked_flags = {"-c", "--config", "--ext-diff", "--textconv"}
+        blocked_flags = {
+            "-c",
+            "--config",
+            "--ext-diff",
+            "--no-index",
+            "--output",
+            "--textconv",
+        }
         if any(
             argument in blocked_flags
             or argument.startswith("--config=")

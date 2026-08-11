@@ -25,6 +25,12 @@ class PluginExecutionError(AgentForgeError):
     code = "plugin_execution_error"
 
 
+class PluginContractError(AgentForgeError):
+    """Raised when a Plugin omits or contradicts required metadata."""
+
+    code = "plugin_contract_error"
+
+
 class MissingCredentialError(AgentForgeError):
     """Raised when an explicitly required credential is unavailable."""
 

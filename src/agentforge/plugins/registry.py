@@ -12,6 +12,7 @@ class PluginRegistry:
     def register(self, plugin: Plugin) -> None:
         if not plugin.name or plugin.name in self._plugins:
             raise ValueError(f"Plugin name is empty or already registered: {plugin.name!r}")
+        plugin.validate_contract()
         self._plugins[plugin.name] = plugin
 
     def get(self, name: str) -> Plugin:

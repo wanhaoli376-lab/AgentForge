@@ -78,8 +78,8 @@ The Shell Plugin accepts only an argv array. `CommandPolicy`:
 - hard-denies shell interpreters and destructive/download commands;
 - permits configured `git`, `pytest`, and `python` adapters by default;
 - limits Git to `status`, `diff`, `log`, and `show`;
-- denies metacharacters, executable paths, traversal arguments, Git write/output flags, Python
-  `-c`, `-m`, and stdin execution;
+- denies metacharacters, executable paths, POSIX/Windows absolute or traversal arguments, Git
+  write/output flags, `diff --no-index`, and Python `-c`, `-m`, and stdin execution;
 - maps Python and pytest to the current trusted interpreter.
 
 `ProcessSandbox` uses `shell=False`, closes stdin, fixes `cwd`, filters environment names, disables

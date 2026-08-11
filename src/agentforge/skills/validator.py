@@ -66,5 +66,8 @@ def parse_skill_document(
             instructions=body,
             source_path=source,
         )
-    except ValidationError as exc:
-        raise SkillValidationError(f"Invalid Skill metadata or body: {exc}") from exc
+    except ValidationError:
+        pass
+    raise SkillValidationError(
+        "Invalid Skill metadata or body; check field names, types, and allowed values"
+    )

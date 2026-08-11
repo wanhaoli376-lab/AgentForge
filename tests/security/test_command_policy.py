@@ -11,6 +11,12 @@ from agentforge.security.command_policy import CommandPolicy
         ["pytest;", "cat", "~/.ssh/id_rsa"],
         ["pytest", ";", "cat", "~/.ssh/id_rsa"],
         ["git", "push"],
+        ["git", "diff", "--output", "victim.patch"],
+        ["git", "diff", "--output=victim.patch"],
+        ["git", "diff", "--no-index", "left.txt", "right.txt"],
+        ["git", "diff", "/etc/passwd"],
+        ["git", "diff", r"C:\Windows\win.ini"],
+        ["git", "diff", r"\Windows\win.ini"],
         ["python", "-c", "import os; os.system('whoami')"],
     ],
 )

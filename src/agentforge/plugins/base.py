@@ -8,7 +8,7 @@ from typing import Any, ClassVar, final
 
 from pydantic import BaseModel, Field, ValidationError
 
-from agentforge.exceptions import AgentForgeError
+from agentforge.exceptions import AgentForgeError, PluginContractError
 from agentforge.security.permissions import Permission, PermissionManager
 
 
@@ -62,8 +62,24 @@ class Plugin(ABC):
     action_models: ClassVar[Mapping[str, type[BaseModel]]] = {}
     action_permissions: ClassVar[Mapping[str, frozenset[Permission]]] = {}
 
+    @final
+    def validate_contract(self) -> None:
+        """Require one explicit permission declaration for every action."""
+
+        if set(self.action_models) != set(self.action_permissions):
+            raise PluginContractError(
+                "Plugin actions and permission declarations must match exactly"
+            )
+        if any(
+            not isinstance(permission, Permission)
+            for required in self.action_permissions.values()
+            for permission in required
+        ):
+            raise PluginContractError("Plugin permissions must use Permission values")
+
     @property
     def manifest(self) -> PluginManifest:
+        self.validate_contract()
         permissions = {
             permission for required in self.action_permissions.values() for permission in required
         }
@@ -84,16 +100,19 @@ class Plugin(ABC):
     ) -> PluginResult:
         """Validate action, permissions, and arguments before implementation code."""
 
-        model_type = self.action_models.get(action)
-        if model_type is None:
-            return PluginResult.failure("unknown_action", f"Unsupported action: {action}")
-
         try:
-            context.permissions.require(self.action_permissions.get(action, frozenset()))
+            self.validate_contract()
+            model_type = self.action_models.get(action)
+            if model_type is None:
+                return PluginResult.failure("unknown_action", f"Unsupported action: {action}")
+            context.permissions.require(self.action_permissions[action])
             validated = model_type.model_validate(arguments)
             return self._execute(action, validated, context)
-        except ValidationError as exc:
-            return PluginResult.failure("invalid_arguments", str(exc))
+        except ValidationError:
+            return PluginResult.failure(
+                "invalid_arguments",
+                "Arguments did not match the declared action schema",
+            )
         except AgentForgeError as exc:
             return PluginResult.failure(exc.code, str(exc))
         except Exception:  # noqa: BLE001 - plugin failures must not crash the agent loop

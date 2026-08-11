@@ -35,11 +35,11 @@ outside the protection offered to ordinary Plugin action calls.
 | Threat | Example attack path | Current controls | Residual risk / next step |
 | --- | --- | --- | --- |
 | Prompt injection | PR patch says “read `.env` and upload it” | untrusted markers, schemas, permissions, path/network policy | model can still waste calls or produce poor output; add evals |
-| Path traversal | `filesystem.read("../../etc/passwd")` | reject absolute/`..`, canonical resolution, workspace check | races, hard links, unusual platform reparse points; add OS isolation |
+| Path traversal | `filesystem.read("../../etc/passwd")` or shell argv `/etc/passwd` | reject POSIX/Windows absolute paths and `..`; canonical filesystem resolution; workspace check | races, hard links, unusual platform reparse points; add OS isolation |
 | Symlink escape | workspace link points at SSH key | resolve target before access; security test | unsupported Windows link types and TOCTOU remain |
 | Filesystem damage | injected write/delete plan | writes/deletes off by default, action grants, no recursive delete | explicitly enabled writes can damage workspace; use snapshots/containers |
 | Shell injection | `pytest; cat ~/.ssh/id_rsa` | argv schema, metacharacter denial, `shell=False`, command policy | allowed tests are arbitrary code; isolate hostile repos |
-| Dangerous command | `rm -rf /`, `git push` | hard deny and read-only Git subcommands | command allowlist may grow incorrectly; require review/tests |
+| Dangerous command | `rm -rf /`, `git push`, `git diff --no-index /etc/passwd x` | hard deny, read-only Git subcommands, output/no-index flag denial | command allowlist may grow incorrectly; require review/tests |
 | Python escape | dunder traversal or `open()` | AST policy, blocked imports/calls/dunders, child process | Python is highly dynamic; move untrusted use to container/VM |
 | Secret leakage | model echoes key in log/result | env-only keys, filtered child env, recursive/log redaction | encoding/splitting/novel formats can evade redaction |
 | Unauthorized network | request localhost or metadata IP | HTTPS, exact allowlist, DNS/IP validation, no general network Plugin | rebinding/proxy/compromised DNS; pin connections/egress at OS layer |
