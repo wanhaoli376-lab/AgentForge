@@ -1,3 +1,7 @@
+<p align="center">
+  <strong>English</strong> · <a href="README.zh-CN.md">简体中文</a>
+</p>
+
 # AgentForge
 
 [![CI](https://github.com/wanhaoli376-lab/AgentForge/actions/workflows/ci.yml/badge.svg)](https://github.com/wanhaoli376-lab/AgentForge/actions/workflows/ci.yml)
