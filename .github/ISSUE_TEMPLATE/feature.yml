@@ -1,0 +1,49 @@
+name: Feature request
+description: Propose a focused framework, Plugin, Skill, or documentation improvement.
+title: "[Feature]: "
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or contributor problem should be solved?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the public interface and one concrete example.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Agent Core
+        - Skill
+        - Plugin
+        - CLI
+        - Security / permissions
+        - Documentation
+        - CI / supply chain
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and permission impact
+      description: New data, side effects, credentials, commands, network, or trust boundaries.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I checked the roadmap and existing Issues.
+          required: true
+        - label: I have separated current needs from optional future scope.
+          required: true

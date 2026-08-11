@@ -1,0 +1,8 @@
+name: hello
+version: 0.1.0
+author: AgentForge example contributors
+entrypoint: plugin:HelloPlugin
+description: Return a greeting without external capabilities.
+actions:
+  - greet
+permissions: []

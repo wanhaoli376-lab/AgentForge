@@ -1,0 +1,52 @@
+name: Bug report
+description: Report reproducible incorrect behavior without sensitive data.
+title: "[Bug]: "
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve AgentForge. Remove credentials and private data.
+  - type: input
+    id: version
+    attributes:
+      label: AgentForge version or commit
+      placeholder: 0.1.0a1 or commit SHA
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Windows 11 / Python 3.14
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include config permissions but replace every credential with a fake value.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing Issues.
+          required: true
+        - label: This report contains no real keys, tokens, or private repository data.
+          required: true
+        - label: This is not an undisclosed vulnerability; those go through SECURITY.md.
+          required: true

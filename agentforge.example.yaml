@@ -1,0 +1,33 @@
+# AgentForge example configuration. Credentials do not belong in this file.
+agent:
+  model: gpt-5.6-luna
+  max_tool_rounds: 8
+
+workspace:
+  root: .
+  skills_dir: skills
+
+permissions:
+  filesystem_read: true
+  filesystem_write: false
+  filesystem_delete: false
+  shell_execute: false
+  python_execute: false
+  network_access: false
+  github_read: true
+  github_write: false
+
+security:
+  redact_secrets: true
+  command_timeout: 30
+  max_output_chars: 50000
+  allowed_commands:
+    - git
+    - pytest
+    - python
+  network_allowlist:
+    - api.github.com
+
+github:
+  read_only: true
+  api_url: https://api.github.com
