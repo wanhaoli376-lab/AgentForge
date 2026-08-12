@@ -151,7 +151,7 @@ def _interactive(state: CLIState) -> None:
 def _runtime_or_exit(state: CLIState) -> Runtime:
     try:
         config = load_config(state.config_path)
-        configure_logging()
+        configure_logging(additional_secret_names=(config.agent.api_key_env,))
         return build_runtime(config)
     except (AgentForgeError, ConfigError) as exc:
         typer.echo(f"Error: {exc}", err=True)
