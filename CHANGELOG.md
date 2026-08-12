@@ -3,7 +3,7 @@
 All notable changes are documented here. AgentForge follows semantic versioning once stable release
 tags begin.
 
-## 0.1.0a1 - Unreleased
+## 0.1.0a1 - 2026-08-12
 
 ### Features
 
