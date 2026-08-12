@@ -23,3 +23,10 @@ tags begin.
 
 - Added architecture, extension development, security, Codex Security, OpenAI maintenance, project
   overview, project analysis, contribution, conduct, and security reporting guides.
+
+### Distribution
+
+- Renamed the PyPI distribution to `agentforge-secure` because the original distribution name was
+  already owned by an unrelated project. The Python package and CLI remain `agentforge`.
+- Added package validation to pull-request CI and a least-privilege, Trusted Publishing workflow
+  for attested PyPI uploads from GitHub Releases after maintainer approval.
