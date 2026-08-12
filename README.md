@@ -72,11 +72,9 @@ runs. See [Architecture](docs/architecture.md) and the [Security Model](docs/sec
 
 ## Quick start
 
-Requirements: Python 3.11 or newer and Git.
+Requirement: Python 3.11 or newer.
 
 ```bash
-git clone https://github.com/wanhaoli376-lab/AgentForge.git
-cd AgentForge
 python -m venv .venv
 ```
 
@@ -90,10 +88,11 @@ source .venv/bin/activate
 .venv\Scripts\Activate.ps1
 ```
 
-Install and inspect the CLI:
+Install the current alpha release and inspect the CLI. The distribution is named
+`agentforge-secure`, while the command and Python package remain `agentforge`.
 
 ```bash
-python -m pip install -e .
+python -m pip install --pre agentforge-secure
 agentforge --help
 agentforge doctor
 ```
@@ -252,8 +251,11 @@ pytest
 pytest tests/security
 ```
 
-CI runs lint, strict type checking, the full test suite, and the dedicated security suite.
-Workflows use read-only repository permissions and do not expose secrets to pull requests.
+CI runs lint, strict type checking, the full test suite, the dedicated security suite, and PyPI
+distribution validation. Workflows use read-only repository permissions and do not expose secrets
+to pull requests.
+Maintainers can follow the [Release Guide](docs/releasing.md) for the `agentforge-secure` PyPI
+distribution.
 
 ## Contributing
 

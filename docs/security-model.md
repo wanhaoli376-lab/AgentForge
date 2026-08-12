@@ -141,3 +141,15 @@ strategy.
 
 For hostile Plugins or repositories, use a disposable container/VM with no host credentials,
 minimal mounts, egress filtering, and a short-lived token scoped to read-only operations.
+
+## Release integrity
+
+PyPI publishing uses a dedicated GitHub Release workflow and Trusted Publishing rather than a
+stored API token. The workflow verifies that the release tag matches package metadata and belongs
+to `main`, separates the read-only build job from the OIDC-enabled publish job, pins third-party
+Actions to full commit SHAs, checks both distributions, smoke-tests the wheel, and requests a PEP
+740 attestation. The `pypi` environment is the maintainer approval boundary.
+
+The workflow cannot prove that source code or a dependency is benign. Treat changes to the release
+workflow, package metadata, GitHub environment, PyPI publisher, and maintainer access as
+credential-equivalent security changes.

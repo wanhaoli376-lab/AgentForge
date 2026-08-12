@@ -63,11 +63,9 @@ LLM 可以提出操作建议，但不能决定自己是否有权执行。每个 
 
 ## 快速开始
 
-需要 Python 3.11 或更高版本，以及 Git。
+需要 Python 3.11 或更高版本。
 
 ```bash
-git clone https://github.com/wanhaoli376-lab/AgentForge.git
-cd AgentForge
 python -m venv .venv
 ```
 
@@ -81,10 +79,10 @@ source .venv/bin/activate
 .venv\Scripts\Activate.ps1
 ```
 
-安装项目并检查 CLI：
+安装当前 Alpha 版本并检查 CLI。PyPI 发行包名是 `agentforge-secure`，命令和 Python 包名仍然是 `agentforge`。
 
 ```bash
-python -m pip install -e .
+python -m pip install --pre agentforge-secure
 agentforge --help
 agentforge doctor
 ```
@@ -236,7 +234,8 @@ pytest
 pytest tests/security
 ```
 
-CI 会运行代码检查、严格类型检查、完整测试和独立安全测试。工作流只有仓库只读权限，也不会向拉取请求暴露密钥。
+CI 会运行代码检查、严格类型检查、完整测试、独立安全测试和 PyPI 发行包校验。工作流只有仓库只读权限，也不会向拉取请求暴露密钥。
+维护者可以按照[发布指南](docs/releasing.md)发布名为 `agentforge-secure` 的 PyPI 发行包。
 
 ## 参与贡献
 

@@ -49,6 +49,7 @@ outside the protection offered to ordinary Plugin action calls.
 | Dependency compromise | typosquat or malicious update | small dependency set, lock/range review, Dependabot, CI | no fully reproducible lock yet; add hashes/SBOM/release signing |
 | Action compromise | moving action tag changes CI code | official actions pinned to full commit SHA, read-only token | runner image and action dependencies remain trusted |
 | Untrusted PR CI | workflow gets token/secrets and runs tests | `pull_request`, contents read, no secrets, no `pull_request_target` | tests still run on GitHub runner; keep token minimal and no deployment |
+| Release compromise | forged tag or modified workflow uploads a malicious package | tag/version/main-history checks, build/publish job separation, pinned Actions, OIDC, `pypi` environment, PEP 740 attestations | maintainer, GitHub, PyPI, runner, or dependency compromise remains possible |
 | Output exhaustion | child prints indefinitely | concurrent draining, total returned-output budget, timeout | process can consume disk/memory/CPU before kill; add cgroups/job objects |
 
 ## Abuse cases
@@ -106,6 +107,6 @@ version pinning, revocation, and reproducible artifacts.
 - process-tree termination and CPU/memory/disk limits;
 - pinned outbound connections or an egress proxy;
 - Plugin process isolation, signatures, and provenance;
-- dependency hashes, SBOM, attestations, and signed releases;
+- dependency hashes, SBOM, and signed releases;
 - policy audit events and explicit confirmation for future remote writes;
 - adversarial prompt/plan evaluation suites.

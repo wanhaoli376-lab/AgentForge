@@ -1,9 +1,9 @@
 [build-system]
-requires = ["hatchling>=1.27"]
+requires = ["hatchling==1.31.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agentforge-ai"
+name = "agentforge-secure"
 version = "0.1.0a1"
 description = "An extensible, security-aware AI agent framework with Skills and Plugins."
 readme = "README.md"
@@ -68,6 +68,7 @@ include = [
   "/CODE_OF_CONDUCT.md",
   "/CONTRIBUTING.md",
   "/README.md",
+  "/README.zh-CN.md",
   "/LICENSE",
   "/SECURITY.md",
   "/pyproject.toml",
