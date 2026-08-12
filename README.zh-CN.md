@@ -130,6 +130,8 @@ AgentForge 通过 `--config` 读取 YAML 或 TOML 配置。默认配置遵循最
 ```yaml
 agent:
   model: gpt-5.6-luna
+  api_mode: responses
+  api_key_env: OPENAI_API_KEY
 workspace:
   root: .
   skills_dir: skills
@@ -148,7 +150,27 @@ security:
   max_output_chars: 50000
 ```
 
-配置模型不接受凭据字段。请通过环境变量提供 `OPENAI_API_KEY` 和可选的 `GITHUB_TOKEN`。GitHub Plugin 无需 Token 也能读取公开仓库，但会受到 GitHub 未认证请求速率限制。
+模型服务可以自定义：OpenAI 或兼容 Responses API 的服务使用 `responses`；只兼容 Chat Completions 的服务使用 `chat_completions`。例如：
+
+```yaml
+agent:
+  model: provider-model
+  api_mode: chat_completions
+  base_url: https://provider.example/v1
+  api_key_env: MY_LLM_API_KEY
+```
+
+```bash
+# macOS / Linux
+export MY_LLM_API_KEY="your-provider-key"
+
+# Windows PowerShell
+$env:MY_LLM_API_KEY = "your-provider-key"
+
+agentforge --config agentforge.yaml doctor
+```
+
+`api_key_env` 只保存环境变量名称，真实 Key 不能写进 YAML/TOML。远程 API 地址必须使用 HTTPS；只有 `localhost`、`127.0.0.1` 等回环开发服务可以使用 HTTP。完整说明见 [LLM 提供方配置](docs/llm-providers.md)。可选的 `GITHUB_TOKEN` 与模型 Key 分开管理；GitHub Plugin 无需 Token 也能读取公开仓库，但会受到 GitHub 未认证请求速率限制。
 
 ## Skills
 
@@ -235,6 +257,7 @@ pytest tests/security
 ```
 
 CI 会运行代码检查、严格类型检查、完整测试、独立安全测试和 PyPI 发行包校验。工作流只有仓库只读权限，也不会向拉取请求暴露密钥。
+维护者可以使用需要单独审批的[真实 API 冒烟测试](docs/live-api-testing.md)，发起一次真实的 OpenAI Responses API 请求，同时不向普通 CI 暴露 Environment Secret。
 维护者可以按照[发布指南](docs/releasing.md)发布名为 `agentforge-secure` 的 PyPI 发行包。
 
 ## 参与贡献

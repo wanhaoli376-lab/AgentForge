@@ -1,6 +1,10 @@
 # AgentForge example configuration. Credentials do not belong in this file.
 agent:
   model: gpt-5.6-luna
+  api_mode: responses
+  api_key_env: OPENAI_API_KEY
+  # Set base_url for an OpenAI-compatible provider. Remote URLs must use HTTPS.
+  # base_url: https://provider.example/v1
   max_tool_rounds: 8
 
 workspace:

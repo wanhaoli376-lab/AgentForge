@@ -6,7 +6,7 @@ from pathlib import Path
 
 from agentforge.agent.core import Agent
 from agentforge.config.models import AppConfig
-from agentforge.llm.client import OpenAILLMClient
+from agentforge.llm.client import create_llm_client
 from agentforge.plugins.base import PluginContext
 from agentforge.plugins.filesystem import FilesystemPlugin
 from agentforge.plugins.github import GitHubPlugin
@@ -34,7 +34,9 @@ class Runtime:
 def build_runtime(config: AppConfig) -> Runtime:
     """Construct built-in adapters while preserving config-enforced permissions."""
 
-    secret_filter = SecretFilter.from_environment()
+    secret_filter = SecretFilter.from_environment(
+        additional_names=(config.agent.api_key_env,),
+    )
     skills = SkillRegistry(_load_skills(config))
     plugins = PluginRegistry()
     plugins.register(FilesystemPlugin(max_output_chars=config.security.max_output_chars))
@@ -67,8 +69,11 @@ def build_runtime(config: AppConfig) -> Runtime:
         workspace_root=config.workspace.root,
         permissions=permission_manager,
     )
-    llm = OpenAILLMClient(
+    llm = create_llm_client(
         model=config.agent.model,
+        api_mode=config.agent.api_mode,
+        api_key_env=config.agent.api_key_env,
+        base_url=config.agent.base_url,
         secret_filter=secret_filter,
     )
     agent = Agent(
