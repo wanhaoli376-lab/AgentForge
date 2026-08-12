@@ -3,6 +3,17 @@
 All notable changes are documented here. AgentForge follows semantic versioning once stable release
 tags begin.
 
+## Unreleased
+
+### Stability
+
+- Raised the tested minimum versions of OpenAI, Pydantic, PyYAML, and pytest-cov.
+- Added public-interface regression tests and an enforced 85% coverage floor.
+- Added configurable models, credential environment variables, compatible API base URLs, and
+  Responses or Chat Completions protocol selection without allowing credentials in config files.
+- Added a manually approved, main-only live OpenAI Responses API smoke workflow whose Environment
+  secret is unavailable to pull requests and normal CI.
+
 ## 0.1.0a1 - 2026-08-12
 
 ### Features

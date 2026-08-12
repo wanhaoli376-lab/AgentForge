@@ -35,3 +35,13 @@ def test_logging_filter_redacts_lazy_format_arguments() -> None:
 
     assert "sk-example-secret" not in output.getvalue()
     assert "[REDACTED]" in output.getvalue()
+
+
+def test_custom_provider_key_is_loaded_for_redaction_by_environment_name() -> None:
+    custom_key = "provider-secret-without-a-known-token-prefix"
+    secret_filter = SecretFilter.from_environment(
+        {"CUSTOM_LLM_API_KEY": custom_key},
+        additional_names=("CUSTOM_LLM_API_KEY",),
+    )
+
+    assert secret_filter.redact_text(f"credential={custom_key}") == "credential=[REDACTED]"

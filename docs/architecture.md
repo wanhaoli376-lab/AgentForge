@@ -87,9 +87,11 @@ be designed before convenience loading.
 
 ### `llm`
 
-`LLMClient.generate(LLMRequest) -> str` is the provider seam. `OpenAILLMClient` is the only module
-that imports and calls the OpenAI SDK. It uses the Responses API and reads `OPENAI_API_KEY` from the
-environment. Planner and Agent modules depend on the seam, so tests use deterministic adapters.
+`LLMClient.generate(LLMRequest) -> str` is the provider seam. `OpenAILLMClient` uses the Responses
+API, while `OpenAICompatibleChatLLMClient` adapts OpenAI-compatible Chat Completions providers.
+Runtime configuration chooses the adapter, model, compatible base URL, and credential environment
+variable without exposing those differences to the Agent Core. Both adapters use the OpenAI SDK.
+Planner and Agent modules depend on the seam, so tests use deterministic adapters.
 
 ### `config` and `runtime`
 

@@ -1,9 +1,10 @@
 # OpenAI API for Open-Source Maintenance
 
-AgentForge centralizes OpenAI access behind `LLMClient`. The current adapter uses the
+AgentForge centralizes model access behind `LLMClient`. The default adapter uses the
 [OpenAI Responses API](https://developers.openai.com/api/docs/guides/function-calling) and reads
-`OPENAI_API_KEY` from the environment. API output is advisory: maintainers review suggestions
-before labels, comments, merges, releases, or security disclosure.
+`OPENAI_API_KEY` from the environment. An OpenAI-compatible Chat Completions adapter is also
+available through configuration. API output is advisory: maintainers review suggestions before
+labels, comments, merges, releases, or security disclosure.
 
 ## Issue triage
 

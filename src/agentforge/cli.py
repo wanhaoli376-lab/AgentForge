@@ -82,7 +82,11 @@ def doctor(ctx: typer.Context) -> None:
     typer.echo(f"Workspace: {runtime.config.workspace.root}")
     typer.echo(f"Skills: {len(runtime.skills.all())}")
     typer.echo(f"Plugins: {len(runtime.plugins.manifests())}")
-    typer.echo(f"OPENAI_API_KEY: {'present' if os.getenv('OPENAI_API_KEY') else 'missing'}")
+    typer.echo(f"LLM model: {runtime.config.agent.model}")
+    typer.echo(f"LLM API mode: {runtime.config.agent.api_mode}")
+    typer.echo(f"LLM base URL: {runtime.config.agent.base_url or 'OpenAI default'}")
+    api_key_env = runtime.config.agent.api_key_env
+    typer.echo(f"{api_key_env}: {'present' if os.getenv(api_key_env) else 'missing'}")
     github_status = "present" if os.getenv("GITHUB_TOKEN") else "missing (public only)"
     typer.echo(f"GITHUB_TOKEN: {github_status}")
     typer.echo(
@@ -147,7 +151,7 @@ def _interactive(state: CLIState) -> None:
 def _runtime_or_exit(state: CLIState) -> Runtime:
     try:
         config = load_config(state.config_path)
-        configure_logging()
+        configure_logging(additional_secret_names=(config.agent.api_key_env,))
         return build_runtime(config)
     except (AgentForgeError, ConfigError) as exc:
         typer.echo(f"Error: {exc}", err=True)

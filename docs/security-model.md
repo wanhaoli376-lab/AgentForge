@@ -123,10 +123,15 @@ Prompt wording can reduce mistakes. Only steps 2–4 enforce the boundary.
 
 ## Credentials and logging
 
-`OPENAI_API_KEY` and `GITHUB_TOKEN` come from environment variables. They are absent from config
-models and examples. `SecretFilter` recognizes common OpenAI/GitHub/Bearer/AWS formats and exact
-known runtime values. A logging filter formats then redacts lazy arguments before handlers emit the
-record. The executor recursively redacts tool results before final LLM synthesis.
+The configured LLM credential and `GITHUB_TOKEN` come from environment variables. Config accepts
+only the LLM credential's environment variable name, never its value. `SecretFilter` recognizes
+common OpenAI/GitHub/Bearer/AWS formats plus the exact selected provider credential at runtime. A
+logging filter formats then redacts lazy arguments before handlers emit the record. The executor
+recursively redacts tool results before final LLM synthesis.
+
+A custom LLM endpoint receives task text, selected Skill instructions, plans, and bounded tool
+summaries. Treat the endpoint as a trusted data processor. Remote endpoints must use HTTPS and URL
+credentials are rejected, but transport validation cannot establish a provider's privacy policy.
 
 Do not place credentials in repository files. Redaction is a last line of defense, not a storage
 strategy.

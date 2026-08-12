@@ -45,7 +45,7 @@ prompts.
 ## Current capabilities
 
 - CLI one-shot and interactive tasks;
-- OpenAI-backed Skill selection, planning, and final synthesis;
+- configurable OpenAI or OpenAI-compatible Skill selection, planning, and final synthesis;
 - Markdown Skill validation and registry;
 - explicit Plugin registry and action metadata;
 - workspace filesystem access;

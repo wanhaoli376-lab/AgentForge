@@ -135,6 +135,8 @@ AgentForge reads YAML or TOML through `--config`. The defaults follow least priv
 ```yaml
 agent:
   model: gpt-5.6-luna
+  api_mode: responses
+  api_key_env: OPENAI_API_KEY
 workspace:
   root: .
   skills_dir: skills
@@ -153,9 +155,27 @@ security:
   max_output_chars: 50000
 ```
 
-Credentials are intentionally unsupported in config files. Use `OPENAI_API_KEY` and optional
-`GITHUB_TOKEN` environment variables. The GitHub Plugin can read public repositories without a
-token, subject to GitHub's unauthenticated rate limits.
+The model provider is configurable. Keep `responses` for OpenAI or another Responses-compatible
+endpoint; use `chat_completions` for an OpenAI-compatible Chat Completions endpoint. For example:
+
+```yaml
+agent:
+  model: provider-model
+  api_mode: chat_completions
+  base_url: https://provider.example/v1
+  api_key_env: MY_LLM_API_KEY
+```
+
+```bash
+export MY_LLM_API_KEY="your-provider-key"
+agentforge --config agentforge.yaml doctor
+```
+
+Credentials are intentionally unsupported in config files: `api_key_env` stores only an
+environment variable name, never the key itself. Remote provider URLs must use HTTPS; plain HTTP
+is allowed only for loopback development services. See [LLM Provider Configuration](docs/llm-providers.md).
+The optional `GITHUB_TOKEN` remains separate. The GitHub Plugin can read public repositories
+without it, subject to GitHub's unauthenticated rate limits.
 
 ## Skills
 
@@ -254,6 +274,8 @@ pytest tests/security
 CI runs lint, strict type checking, the full test suite, the dedicated security suite, and PyPI
 distribution validation. Workflows use read-only repository permissions and do not expose secrets
 to pull requests.
+Maintainers can use the separately approved [live API smoke test](docs/live-api-testing.md) to make
+one real OpenAI Responses API request without exposing its Environment secret to normal CI.
 Maintainers can follow the [Release Guide](docs/releasing.md) for the `agentforge-secure` PyPI
 distribution.
 

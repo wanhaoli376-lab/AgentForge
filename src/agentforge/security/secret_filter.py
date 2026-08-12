@@ -3,7 +3,7 @@
 import logging
 import os
 import re
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 from typing import Any
 
 
@@ -35,16 +35,22 @@ class SecretFilter:
         )
 
     @classmethod
-    def from_environment(cls, environ: Mapping[str, str] | None = None) -> "SecretFilter":
+    def from_environment(
+        cls,
+        environ: Mapping[str, str] | None = None,
+        *,
+        additional_names: Collection[str] = (),
+    ) -> "SecretFilter":
         """Include known credential values without retaining the full environment."""
 
         source = environ if environ is not None else os.environ
-        names = (
+        names = {
             "OPENAI_API_KEY",
             "GITHUB_TOKEN",
             "AWS_ACCESS_KEY_ID",
             "AWS_SECRET_ACCESS_KEY",
-        )
+            *additional_names,
+        }
         return cls({source[name] for name in names if source.get(name)})
 
     def redact_text(self, text: str) -> str:

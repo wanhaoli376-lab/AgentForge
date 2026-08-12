@@ -1,0 +1,54 @@
+name: Live API smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: OpenAI model ID to verify
+        required: true
+        default: gpt-5.6-luna
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-api-smoke-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  openai:
+    name: OpenAI Responses API
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: live-api
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project and test dependency
+        run: python -m pip install -e ".[dev]"
+
+      - name: Verify environment secret is configured
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: test -n "$OPENAI_API_KEY"
+
+      - name: Make one live Responses API request
+        env:
+          AGENTFORGE_LIVE_API: "1"
+          AGENTFORGE_MODEL: ${{ inputs.model }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python -m pytest tests/live/test_openai_api.py -q

@@ -25,7 +25,7 @@ classifiers = [
 dependencies = [
   "httpx>=0.27,<1",
   "openai>=2.53.0,<3",
-  "pydantic>=2.10,<3",
+  "pydantic>=2.13.4,<3",
   "PyYAML>=6.0.3,<7",
   "typer>=0.15,<1",
 ]
@@ -83,6 +83,7 @@ branch = true
 source = ["agentforge"]
 
 [tool.coverage.report]
+fail_under = 85
 show_missing = true
 skip_covered = true
 
