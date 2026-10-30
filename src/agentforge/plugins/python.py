@@ -62,15 +62,22 @@ class PythonPlugin(Plugin):
             cwd=context.workspace_root,
             timeout=min(args.timeout or self._timeout, self._timeout),
         )
-        return PluginResult.success(
-            {
-                "command": "python -I -S -c <validated-code>",
-                "code_sha256": hashlib.sha256(args.code.encode("utf-8")).hexdigest(),
-                "exit_code": result.exit_code,
-                "stdout": result.stdout,
-                "stderr": result.stderr,
-                "truncated": result.truncated,
-                "timed_out": result.timed_out,
-                "duration_seconds": result.duration_seconds,
-            }
-        )
+        data = {
+            "command": "python -I -S -c <validated-code>",
+            "code_sha256": hashlib.sha256(args.code.encode("utf-8")).hexdigest(),
+            "exit_code": result.exit_code,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "truncated": result.truncated,
+            "timed_out": result.timed_out,
+            "duration_seconds": result.duration_seconds,
+        }
+        if result.timed_out:
+            return PluginResult.failure("process_timeout", "Python code timed out", data=data)
+        if result.exit_code != 0:
+            return PluginResult.failure(
+                "process_failed",
+                f"Python exited with code {result.exit_code}",
+                data=data,
+            )
+        return PluginResult.success(data)

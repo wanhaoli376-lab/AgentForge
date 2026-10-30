@@ -70,6 +70,30 @@ def test_registry_exposes_plugin_capabilities() -> None:
     manifest = registry.manifests()[0]
     assert manifest.actions == ("echo",)
     assert manifest.permissions == (Permission.SHELL_EXECUTE,)
+    assert manifest.action_schemas["echo"]["required"] == ["message"]
+    assert manifest.action_schemas["echo"]["properties"]["message"]["type"] == "string"
+
+
+def test_registry_hides_ungranted_actions_without_mutating_the_full_catalog() -> None:
+    registry = PluginRegistry()
+    registry.register(EchoPlugin())
+
+    assert registry.manifests(permissions=PermissionManager(set())) == ()
+    assert registry.manifests()[0].actions == ("echo",)
+    allowed = registry.manifests(permissions=PermissionManager({Permission.SHELL_EXECUTE}))
+    assert allowed == registry.manifests()
+
+
+def test_registry_keeps_actions_that_require_no_permissions() -> None:
+    class UnrestrictedEcho(EchoPlugin):
+        action_permissions: ClassVar = {"echo": frozenset()}
+
+    registry = PluginRegistry()
+    registry.register(UnrestrictedEcho())
+
+    manifest = registry.manifests(permissions=PermissionManager(set()))[0]
+    assert manifest.actions == ("echo",)
+    assert manifest.permissions == ()
 
 
 def test_registry_rejects_plugin_with_missing_permission_metadata() -> None:

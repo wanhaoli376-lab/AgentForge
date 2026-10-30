@@ -53,6 +53,17 @@ Registration rejects a Plugin unless `action_models` and `action_permissions` co
 same action names. Actions that need no capability must still declare an explicit empty set. The
 base `execute` method repeats this contract check before every call.
 
+`Plugin.manifest.action_schemas` contains the JSON Schema generated from each action model,
+including required fields and bounds. `registry.manifests()` returns the full catalog for
+inspection; `registry.manifests(permissions=manager)` returns only currently granted actions and
+their schemas for planning. Filtering the catalog does not replace execution-time checks.
+
+Return `PluginResult.failure(code, message, data=diagnostics)` when an action fails. Keep useful,
+bounded diagnostics in `data`, without including credentials. The executor stops after that
+result, and the Agent reports a failed run while preserving completed actions. Built-in Shell and
+Python actions now treat nonzero process exit codes and timeouts as failures. Callers that
+previously relied on `ok=true` for those cases must inspect `error` and the retained `data`.
+
 Do not override `execute`. The base method owns permission and argument validation. Put behavior in
 `_execute`, and re-validate/cast the action model there for static type clarity.
 

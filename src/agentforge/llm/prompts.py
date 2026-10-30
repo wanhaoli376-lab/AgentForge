@@ -55,7 +55,10 @@ def planning_request(
         _SECURITY_INSTRUCTIONS
         + f"Create an execution plan with at most {max_steps} steps. Each step must name exactly "
         "one supplied plugin action and provide a JSON arguments object. Do not invent plugins or "
-        "actions. The runtime will independently enforce permissions and validate arguments. "
+        "actions. Follow each action's action_schemas JSON Schema, including required arguments "
+        "and value constraints. The catalog includes only currently granted actions. "
+        "The runtime independently enforces permissions and validates arguments. "
+        "Execution stops at the first failed action; subsequent steps will not run. "
         + f"Return JSON matching this schema: {json.dumps(schema)}"
     )
     return instructions, json.dumps(payload, ensure_ascii=False)

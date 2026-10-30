@@ -31,8 +31,18 @@ class PluginResult(BaseModel):
         return cls(ok=True, data=dict(data or {}))
 
     @classmethod
-    def failure(cls, code: str, message: str) -> "PluginResult":
-        return cls(ok=False, error=PluginErrorInfo(code=code, message=message))
+    def failure(
+        cls,
+        code: str,
+        message: str,
+        *,
+        data: Mapping[str, Any] | None = None,
+    ) -> "PluginResult":
+        return cls(
+            ok=False,
+            data=dict(data or {}),
+            error=PluginErrorInfo(code=code, message=message),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,6 +61,7 @@ class PluginManifest(BaseModel):
     description: str
     actions: tuple[str, ...]
     permissions: tuple[Permission, ...]
+    action_schemas: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
 
 class Plugin(ABC):
@@ -89,6 +100,10 @@ class Plugin(ABC):
             description=self.description,
             actions=tuple(sorted(self.action_models)),
             permissions=tuple(sorted(permissions, key=str)),
+            action_schemas={
+                action: model.model_json_schema()
+                for action, model in sorted(self.action_models.items())
+            },
         )
 
     @final

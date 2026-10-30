@@ -1,3 +1,4 @@
+import json
 from collections import deque
 from pathlib import Path
 
@@ -147,3 +148,54 @@ def test_interactive_mode_skips_blank_input_then_runs_a_task(
 
     assert result.exit_code == 0
     assert "Interactive answer." in result.stdout
+
+
+@pytest.mark.parametrize("as_json", [False, True])
+def test_failed_tool_returns_nonzero_exit_with_useful_output(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    as_json: bool,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    _script_openai(
+        monkeypatch,
+        '{"skills": []}',
+        '{"steps": [{"plugin": "filesystem", "action": "read", '
+        '"arguments": {"path": "missing.txt"}}]}',
+        "The requested file does not exist.",
+    )
+
+    result = runner.invoke(app, ["run", "Read missing.txt", *(["--json"] if as_json else [])])
+
+    assert result.exit_code == 2
+    if as_json:
+        payload = json.loads(result.stdout)
+        assert payload["ok"] is False
+        assert payload["tool_results"][0]["result"]["ok"] is False
+    else:
+        assert "The requested file does not exist." in result.stdout
+        assert "tool_execution_failed" in result.stderr
+
+
+def test_interactive_mode_shows_failure_and_accepts_the_next_task(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    _script_openai(
+        monkeypatch,
+        '{"skills": []}',
+        '{"steps": [{"plugin": "filesystem", "action": "read", '
+        '"arguments": {"path": "missing.txt"}}]}',
+        "The file is missing.",
+        '{"skills": []}',
+        '{"steps": []}',
+        "Second task completed.",
+    )
+
+    result = runner.invoke(app, [], input="Read missing.txt\nExplain without tools\nquit\n")
+
+    assert result.exit_code == 0
+    assert "The file is missing." in result.stdout
+    assert "tool_execution_failed" in result.stderr
+    assert "Second task completed." in result.stdout

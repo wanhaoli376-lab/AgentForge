@@ -10,6 +10,7 @@ from agentforge.exceptions import PlanValidationError
 from agentforge.llm.client import LLMClient, LLMRequest
 from agentforge.llm.prompts import planning_request, skill_selection_request, summary_request
 from agentforge.plugins.base import PluginManifest
+from agentforge.security.secret_filter import SecretFilter
 from agentforge.skills.models import Skill
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -18,13 +19,20 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 class Planner:
     """Own all model interactions for a single-agent run."""
 
-    def __init__(self, llm: LLMClient, *, max_steps: int = 8) -> None:
+    def __init__(
+        self,
+        llm: LLMClient,
+        *,
+        max_steps: int = 8,
+        secret_filter: SecretFilter | None = None,
+    ) -> None:
         self._llm = llm
         self._max_steps = max_steps
+        self._secret_filter = secret_filter or SecretFilter()
 
     def select_skills(self, task: str, available: tuple[Skill, ...]) -> tuple[str, ...]:
         instructions, input_text = skill_selection_request(task, available)
-        output = self._llm.generate(LLMRequest(instructions=instructions, input=input_text))
+        output = self._generate(instructions, input_text)
         selection = self._parse(output, SkillSelection)
         available_names = {skill.name for skill in available}
         unknown = sorted(set(selection.skills) - available_names)
@@ -44,7 +52,7 @@ class Planner:
             plugins,
             max_steps=self._max_steps,
         )
-        output = self._llm.generate(LLMRequest(instructions=instructions, input=input_text))
+        output = self._generate(instructions, input_text)
         plan = self._parse(output, ExecutionPlan)
         if len(plan.steps) > self._max_steps:
             raise PlanValidationError(f"Plan exceeds the {self._max_steps}-step runtime limit")
@@ -65,7 +73,18 @@ class Planner:
         records: tuple[ToolExecutionRecord, ...],
     ) -> str:
         instructions, input_text = summary_request(task, plan, records)
-        return self._llm.generate(LLMRequest(instructions=instructions, input=input_text)).strip()
+        return self._generate(instructions, input_text).strip()
+
+    def _generate(self, instructions: str, input_text: str) -> str:
+        """Keep custom LLM adapters behind the same redaction boundary as built-ins."""
+
+        output = self._llm.generate(
+            LLMRequest(
+                instructions=self._secret_filter.redact_text(instructions),
+                input=self._secret_filter.redact_text(input_text),
+            )
+        )
+        return self._secret_filter.redact_text(output)
 
     @staticmethod
     def _parse(text: str, model_type: type[ModelT]) -> ModelT:

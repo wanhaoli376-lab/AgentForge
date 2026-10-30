@@ -49,7 +49,7 @@ class AgentErrorInfo(BaseModel):
 
 
 class AgentResult(BaseModel):
-    """Public result of Agent.run."""
+    """Public run result; failures retain completed work and are not a rollback."""
 
     ok: bool
     answer: str = ""

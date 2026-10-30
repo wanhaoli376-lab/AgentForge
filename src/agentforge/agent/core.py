@@ -1,6 +1,6 @@
 """Single-agent orchestration with code-enforced tool boundaries."""
 
-from agentforge.agent.context import AgentErrorInfo, AgentResult
+from agentforge.agent.context import AgentErrorInfo, AgentResult, ExecutionPlan, ToolExecutionRecord
 from agentforge.agent.executor import Executor
 from agentforge.agent.planner import Planner
 from agentforge.exceptions import AgentForgeError
@@ -27,9 +27,10 @@ class Agent:
     ) -> None:
         self._skills = skills
         self._plugins = plugins
-        self._planner = Planner(llm, max_steps=max_steps)
+        self._planner = Planner(llm, max_steps=max_steps, secret_filter=secret_filter)
         self._executor = Executor(plugins, plugin_context, secret_filter)
         self._secret_filter = secret_filter
+        self._permissions = plugin_context.permissions
 
     def run(self, task: str) -> AgentResult:
         """Run one natural-language task without giving the LLM direct system access."""
@@ -40,24 +41,47 @@ class Agent:
                 ok=False,
                 error=AgentErrorInfo(code="invalid_task", message="Task must not be empty"),
             )
+        selected_names: tuple[str, ...] = ()
+        plan: ExecutionPlan | None = None
+        records: tuple[ToolExecutionRecord, ...] = ()
         try:
             selected_names = self._planner.select_skills(safe_task, self._skills.all())
             selected = tuple(self._skills.get(name) for name in selected_names)
             self._validate_selected_plugins(selected_names)
-            plan = self._planner.create_plan(safe_task, selected, self._plugins.manifests())
+            plan = self._planner.create_plan(
+                safe_task,
+                selected,
+                self._plugins.manifests(permissions=self._permissions),
+            )
             records = self._executor.execute(plan)
             answer = self._planner.summarize(safe_task, plan, records)
+            failed = any(not record.result.ok for record in records)
             return AgentResult(
-                ok=True,
+                ok=not failed,
                 answer=answer,
                 selected_skills=selected_names,
                 plan=plan,
                 tool_results=records,
+                error=AgentErrorInfo(
+                    code="tool_execution_failed",
+                    message=(
+                        "A tool action failed. Execution stopped; "
+                        f"{len(plan.steps) - len(records)} remaining step(s) were not executed."
+                    ),
+                )
+                if failed
+                else None,
             )
         except AgentForgeError as exc:
             return AgentResult(
                 ok=False,
-                error=AgentErrorInfo(code=exc.code, message=str(exc)),
+                selected_skills=selected_names,
+                plan=plan,
+                tool_results=records,
+                error=AgentErrorInfo(
+                    code=exc.code,
+                    message=self._secret_filter.redact_text(str(exc)),
+                ),
             )
 
     def _validate_selected_plugins(self, selected_names: tuple[str, ...]) -> None:

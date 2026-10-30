@@ -20,6 +20,7 @@ class Executor:
         self._secret_filter = secret_filter
 
     def execute(self, plan: ExecutionPlan) -> tuple[ToolExecutionRecord, ...]:
+        """Stop on the first failed action; never replay or roll back completed actions."""
         records: list[ToolExecutionRecord] = []
         for step in plan.steps:
             plugin = self._plugins.get(step.plugin)
@@ -28,4 +29,6 @@ class Executor:
                 self._secret_filter.redact(result.model_dump())
             )
             records.append(ToolExecutionRecord(step=step, result=safe_result))
+            if not safe_result.ok:
+                break
         return tuple(records)

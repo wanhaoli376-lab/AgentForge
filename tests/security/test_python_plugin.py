@@ -56,6 +56,20 @@ def test_python_plugin_enforces_timeout(tmp_path: Path) -> None:
         _python_context(tmp_path),
     )
 
-    assert result.ok is True
+    assert result.ok is False
+    assert result.error is not None and result.error.code == "process_timeout"
     assert result.data["timed_out"] is True
     assert result.data["exit_code"] != 0
+
+
+def test_python_runtime_failure_keeps_diagnostics_and_reports_failure(tmp_path: Path) -> None:
+    result = PythonPlugin(timeout=2).execute(
+        "run",
+        {"code": "print(1 / 0)"},
+        _python_context(tmp_path),
+    )
+
+    assert result.ok is False
+    assert result.error is not None and result.error.code == "process_failed"
+    assert result.data["exit_code"] != 0
+    assert "ZeroDivisionError" in result.data["stderr"]

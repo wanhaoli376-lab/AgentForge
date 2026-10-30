@@ -113,6 +113,11 @@ Run a task:
 agentforge run "summarize the current repository"
 ```
 
+Use `agentforge run "your task" --json` for structured results. Tool failures and timeouts return
+a nonzero CLI exit code and stop remaining steps. Completed actions and diagnostic output are
+retained, including when the final model summary fails; inspect them before retrying a task that
+writes files. See [Execution semantics](docs/architecture.md#execution-semantics).
+
 Or start interactive mode:
 
 ```text

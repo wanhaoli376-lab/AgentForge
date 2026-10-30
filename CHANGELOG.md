@@ -7,6 +7,14 @@ tags begin.
 
 ### Stability
 
+- Include action argument JSON Schemas in Plugin manifests and expose only currently granted
+  actions to the planner; execution-time permission checks remain authoritative.
+- Preserve plans and completed tool records when final model synthesis fails, and redact custom
+  model responses and Agent errors at the framework boundary.
+- **Behavior change:** stop at the first failed tool action and return a failed Agent result with
+  CLI exit code 2. Shell/Python nonzero exits and timeouts now return `ok=false` while retaining
+  diagnostic data. Partial answers remain visible; completed actions are not rolled back or
+  automatically replayed.
 - Raised the tested minimum versions of OpenAI, Pydantic, PyYAML, and pytest-cov.
 - Added public-interface regression tests and an enforced 85% coverage floor.
 - Added configurable models, credential environment variables, compatible API base URLs, and

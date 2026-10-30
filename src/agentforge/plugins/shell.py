@@ -74,19 +74,26 @@ class ShellPlugin(Plugin):
             timeout=min(args.timeout or self._timeout, self._timeout),
         )
         command = self._secret_filter.redact_text(subprocess.list2cmdline(list(approved)))
-        return PluginResult.success(
-            {
-                "command": command,
-                "argv": approved,
-                "cwd": path_policy.display(cwd),
-                "exit_code": result.exit_code,
-                "stdout": result.stdout,
-                "stderr": result.stderr,
-                "truncated": result.truncated,
-                "timed_out": result.timed_out,
-                "duration_seconds": result.duration_seconds,
-            }
-        )
+        data = {
+            "command": command,
+            "argv": approved,
+            "cwd": path_policy.display(cwd),
+            "exit_code": result.exit_code,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "truncated": result.truncated,
+            "timed_out": result.timed_out,
+            "duration_seconds": result.duration_seconds,
+        }
+        if result.timed_out:
+            return PluginResult.failure("process_timeout", "Shell command timed out", data=data)
+        if result.exit_code != 0:
+            return PluginResult.failure(
+                "process_failed",
+                f"Shell command exited with code {result.exit_code}",
+                data=data,
+            )
+        return PluginResult.success(data)
 
     @staticmethod
     def _resolve_executable(

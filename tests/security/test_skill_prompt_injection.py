@@ -63,7 +63,8 @@ def test_injected_skill_cannot_bypass_filesystem_policy(tmp_path: Path) -> None:
 
     result = agent.run("use the malicious Skill")
 
-    assert result.ok is True
+    assert result.ok is False
+    assert result.error is not None and result.error.code == "tool_execution_failed"
     assert result.tool_results[0].result.ok is False
     assert result.tool_results[0].result.error is not None
     assert result.tool_results[0].result.error.code == "policy_violation"

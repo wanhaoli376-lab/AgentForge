@@ -8,6 +8,7 @@ from typing import Annotated
 import typer
 
 from agentforge import __version__
+from agentforge.agent.context import AgentResult
 from agentforge.config.loader import ConfigError, load_config
 from agentforge.exceptions import AgentForgeError
 from agentforge.logging_config import configure_logging
@@ -64,11 +65,8 @@ def run_command(
     result = runtime.agent.run(task)
     if output_json:
         typer.echo(result.model_dump_json(indent=2))
-    elif result.ok:
-        typer.echo(result.answer)
     else:
-        assert result.error is not None
-        typer.echo(f"Error [{result.error.code}]: {result.error.message}", err=True)
+        _print_result(result)
     if not result.ok:
         raise typer.Exit(code=2)
 
@@ -141,11 +139,24 @@ def _interactive(state: CLIState) -> None:
         if not task:
             continue
         result = runtime.agent.run(task)
-        if result.ok:
-            typer.echo(result.answer)
-        else:
-            assert result.error is not None
-            typer.echo(f"Error [{result.error.code}]: {result.error.message}", err=True)
+        _print_result(result)
+
+
+def _print_result(result: AgentResult) -> None:
+    """Show partial answers and completed work even when a task fails."""
+
+    if result.answer:
+        typer.echo(result.answer)
+    if not result.ok:
+        if result.tool_results:
+            completed = sum(record.result.ok for record in result.tool_results)
+            typer.echo(
+                f"Tool actions completed: {completed}/{len(result.tool_results)} attempted. "
+                "Completed actions were not rolled back. Use run --json for execution details.",
+                err=True,
+            )
+        assert result.error is not None
+        typer.echo(f"Error [{result.error.code}]: {result.error.message}", err=True)
 
 
 def _runtime_or_exit(state: CLIState) -> Runtime:

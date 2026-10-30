@@ -103,6 +103,10 @@ $env:OPENAI_API_KEY = "your-key"
 agentforge run "总结当前仓库的用途和主要模块"
 ```
 
+需要结构化结果时，使用 `agentforge run "你的任务" --json`。工具失败或超时后，CLI 返回非零
+退出码，并停止后续步骤。已经完成的操作和诊断输出会保留，即使最后的模型总结失败也不会丢失；
+重新运行涉及写入的任务前，请先检查这些记录。详见[执行语义](docs/architecture.md#execution-semantics)。
+
 也可以启动交互模式：
 
 ```text
